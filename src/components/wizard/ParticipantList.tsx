@@ -27,11 +27,9 @@ interface SortableItemProps {
 }
 
 function SortableItem({ id, index, participantType }: SortableItemProps) {
-  const { register, watch } = useFormContext<WizardFormData>()
+  const { register } = useFormContext<WizardFormData>()
   const [expanded, setExpanded] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
-
-  const playerNames = watch(`participants.${index}.playerNames`) ?? []
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),

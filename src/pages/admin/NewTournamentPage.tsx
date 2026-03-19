@@ -66,7 +66,7 @@ export function NewTournamentPage() {
     },
   })
 
-  const { watch, trigger, getValues, setValue } = methods
+  const { trigger, getValues, setValue } = methods
 
   async function handleNextStep() {
     const valid = await trigger(['name', 'participant_type', 'type', 'num_participants', 'num_groups'])

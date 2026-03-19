@@ -67,11 +67,6 @@ export function TournamentThemeProvider({ theme, children }: TournamentThemeProv
       } as React.CSSProperties
     : uiVars as React.CSSProperties
 
-  // Blend the background color over the image at 55% opacity to fade it into the background
-  const bgOverlay = theme?.background_color
-    ? `${theme.background_color}8c` // 8c hex ≈ 55% opacity
-    : '#11182780'
-
   const bgStyle: React.CSSProperties = theme
     ? { minHeight: '100dvh', backgroundColor: theme.background_color }
     : { minHeight: '100dvh', backgroundColor: '#111827' }

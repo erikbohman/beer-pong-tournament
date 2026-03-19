@@ -170,7 +170,6 @@ export function getNextRoundMatchInfo(
   if (completedMatch.stage !== 'knockout') return null
 
   const round = completedMatch.round
-  const matchNum = completedMatch.match_number
 
   // Find all matches in the current round to determine offset
   const currentRoundMatches = allMatches
