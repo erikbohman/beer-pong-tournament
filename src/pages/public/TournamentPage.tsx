@@ -143,7 +143,7 @@ export function TournamentPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-900">
         <div className="text-center">
-          <p className="text-2xl font-bold text-white">Tournament not found</p>
+          <p className="text-2xl font-medium text-white">Tournament not found</p>
           <p className="mt-2 text-sm text-gray-400">This tournament may not be published yet.</p>
         </div>
       </div>
@@ -161,7 +161,7 @@ export function TournamentPage() {
                 <img src={theme.logo_url} alt="Logo" className="h-8 w-8 rounded object-contain" />
               )}
               <h1
-                className="text-xl font-bold truncate"
+                className="text-xl font-semibold truncate"
                 style={{ color: primaryColor }}
               >
                 {tournament.name}
@@ -177,7 +177,7 @@ export function TournamentPage() {
                   key={t}
                   type="button"
                   onClick={() => setTab(t)}
-                  className="rounded-lg px-4 py-1.5 text-sm font-semibold capitalize transition-colors"
+                  className="rounded-lg px-4 py-1.5 text-sm font-medium capitalize transition-colors"
                   style={
                     tab === t
                       ? { backgroundColor: primaryColor, color: 'white' }

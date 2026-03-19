@@ -63,7 +63,7 @@ export function KnockoutBracket({
             {rounds.map(({ round }) => (
               <div key={round} className="flex w-44 justify-center">
                 <span
-                  className="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest"
+                  className="rounded-full px-3 py-1 text-xs font-medium uppercase tracking-widest"
                   style={{ color: primaryColor, backgroundColor: 'var(--ui-card-bg)', border: '1px solid var(--ui-card-border)' }}
                 >
                   {getRoundLabel(round, maxRound)}

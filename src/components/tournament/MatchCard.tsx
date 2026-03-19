@@ -35,7 +35,7 @@ export function MatchCard({ match, participant1Name, participant2Name, primaryCo
           {participant1Name || 'TBD'}
         </span>
         {isComplete && (
-          <span className="text-xs font-bold" style={{ color: p1Wins ? primaryColor : 'var(--ui-text-faint)' }}>
+          <span className="text-xs font-medium" style={{ color: p1Wins ? primaryColor : 'var(--ui-text-faint)' }}>
             {match.participant1_cups ?? 0}
           </span>
         )}
@@ -53,7 +53,7 @@ export function MatchCard({ match, participant1Name, participant2Name, primaryCo
           {participant2Name || 'TBD'}
         </span>
         {isComplete && (
-          <span className="text-xs font-bold" style={{ color: p2Wins ? primaryColor : 'var(--ui-text-faint)' }}>
+          <span className="text-xs font-medium" style={{ color: p2Wins ? primaryColor : 'var(--ui-text-faint)' }}>
             {match.participant2_cups ?? 0}
           </span>
         )}

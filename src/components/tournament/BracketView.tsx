@@ -128,7 +128,7 @@ export function BracketView({
                     <div key={group.id} className="flex w-44 flex-col gap-3">
                       <div className="flex justify-center">
                         <span
-                          className="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest"
+                          className="rounded-full px-3 py-1 text-xs font-medium uppercase tracking-widest"
                           style={{ color: primaryColor, backgroundColor: 'var(--ui-card-bg)', border: '1px solid var(--ui-card-border)' }}
                         >
                           {group.name}
@@ -181,7 +181,7 @@ export function BracketView({
             key={tab}
             type="button"
             onClick={() => setSubTab(tab)}
-            className="flex-1 rounded-lg py-2 text-sm font-semibold capitalize transition-colors"
+            className="flex-1 rounded-lg py-2 text-sm font-medium capitalize transition-colors"
             style={
               subTab === tab
                 ? { backgroundColor: primaryColor, color: 'white' }
@@ -219,7 +219,7 @@ export function BracketView({
                       <div key={group.id} className="flex w-44 flex-col gap-3">
                         <div className="flex justify-center">
                           <span
-                            className="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest"
+                            className="rounded-full px-3 py-1 text-xs font-medium uppercase tracking-widest"
                             style={{ color: primaryColor, backgroundColor: 'var(--ui-card-bg)', border: '1px solid var(--ui-card-border)' }}
                           >
                             {group.name}
@@ -248,7 +248,7 @@ export function BracketView({
               className="mt-2 flex flex-col items-center gap-3 rounded-2xl border border-dashed py-8 px-4 text-center"
               style={{ borderColor: `${primaryColor}60` }}
             >
-              <p className="text-sm font-semibold" style={{ color: 'var(--ui-text-primary)' }}>
+              <p className="text-sm font-medium" style={{ color: 'var(--ui-text-primary)' }}>
                 All group matches are complete!
               </p>
               <p className="text-xs" style={{ color: 'var(--ui-text-muted)' }}>
@@ -263,7 +263,7 @@ export function BracketView({
                 type="button"
                 onClick={generateKnockout}
                 disabled={generatingKnockout}
-                className="mt-1 rounded-xl px-6 py-2.5 text-sm font-bold text-white transition-opacity disabled:opacity-60"
+                className="mt-1 rounded-xl px-6 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-60"
                 style={{ backgroundColor: primaryColor }}
               >
                 {generatingKnockout ? 'Generating…' : 'Generate Knockout Bracket →'}

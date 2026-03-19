@@ -27,7 +27,7 @@ export function ParticipantsTab({
               style={{ backgroundColor: 'var(--ui-card-bg)', border: '1px solid var(--ui-card-border)' }}
             >
               <span
-                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium text-white"
                 style={{ backgroundColor: primaryColor }}
               >
                 {i + 1}
@@ -53,12 +53,12 @@ export function ParticipantsTab({
           >
             <div className="mb-3 flex items-center gap-2">
               <span
-                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium text-white"
                 style={{ backgroundColor: primaryColor }}
               >
                 {i + 1}
               </span>
-              <span className="font-bold" style={{ color: 'var(--ui-text-primary)' }}>{team.name}</span>
+              <span className="font-medium" style={{ color: 'var(--ui-text-primary)' }}>{team.name}</span>
             </div>
             {(teamPlayers[team.id] ?? []).length > 0 && (
               <div className="flex flex-col gap-1 pl-9">

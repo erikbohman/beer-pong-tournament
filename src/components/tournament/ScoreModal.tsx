@@ -75,7 +75,7 @@ export function ScoreModal({
       >
         {step === 'winner' ? (
           <>
-            <h3 className="mb-1 text-center text-lg font-bold" style={{ color: 'var(--ui-text-primary)' }}>Enter Result</h3>
+            <h3 className="mb-1 text-center text-lg font-medium" style={{ color: 'var(--ui-text-primary)' }}>Enter Result</h3>
             <p className="mb-5 text-center text-sm" style={{ color: 'var(--ui-text-muted)' }}>
               Tap the winner
             </p>
@@ -97,7 +97,7 @@ export function ScoreModal({
                   onMouseEnter={e => (e.currentTarget.style.borderColor = primaryColor)}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}
                 >
-                  <span className="text-center text-sm font-bold" style={{ color: 'var(--ui-text-primary)' }}>{name}</span>
+                  <span className="text-center text-sm font-medium" style={{ color: 'var(--ui-text-primary)' }}>{name}</span>
                 </button>
               ))}
             </div>
@@ -105,7 +105,7 @@ export function ScoreModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-xl py-3 text-sm font-semibold"
+              className="w-full rounded-xl py-3 text-sm font-medium"
               style={{ backgroundColor: 'var(--ui-button-bg)', color: 'var(--ui-text-muted)' }}
             >
               Cancel
@@ -123,7 +123,7 @@ export function ScoreModal({
                 <ChevronLeft size={20} />
               </button>
               <div className="flex-1 text-center">
-                <h3 className="text-lg font-bold" style={{ color: 'var(--ui-text-primary)' }}>Cups left</h3>
+                <h3 className="text-lg font-medium" style={{ color: 'var(--ui-text-primary)' }}>Cups left</h3>
                 <p className="text-sm" style={{ color: 'var(--ui-text-muted)' }}>
                   for {loserName}
                 </p>
@@ -143,7 +143,7 @@ export function ScoreModal({
                     type="button"
                     disabled={saving}
                     onClick={() => handleCupsSelect(n)}
-                    className="flex h-14 items-center justify-center rounded-xl text-lg font-bold transition-all active:scale-95 disabled:opacity-50"
+                    className="flex h-14 items-center justify-center rounded-xl text-lg font-medium transition-all active:scale-95 disabled:opacity-50"
                     style={{
                       backgroundColor: isCurrent ? accentColor : 'var(--ui-button-bg)',
                       border: isCurrent ? `2px solid ${accentColor}` : '2px solid transparent',
@@ -167,7 +167,7 @@ export function ScoreModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-xl py-3 text-sm font-semibold"
+              className="w-full rounded-xl py-3 text-sm font-medium"
               style={{ backgroundColor: 'var(--ui-button-bg)', color: 'var(--ui-text-muted)' }}
             >
               Cancel

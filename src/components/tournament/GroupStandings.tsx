@@ -31,7 +31,7 @@ export function GroupStandings({
             <div key={group.id}>
               <div className="mb-2">
                 <span
-                  className="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest"
+                  className="rounded-full px-3 py-1 text-xs font-medium uppercase tracking-widest"
                   style={{ color: primaryColor, backgroundColor: 'var(--ui-card-bg)', border: '1px solid var(--ui-card-border)' }}
                 >
                   {group.name}
@@ -44,7 +44,7 @@ export function GroupStandings({
                       {['#', 'Name', 'P', 'W', 'L', 'CF', 'CA', '+/-'].map(h => (
                         <th
                           key={h}
-                          className="px-3 py-2 text-left text-xs font-semibold"
+                          className="px-3 py-2 text-left text-xs font-medium"
                           style={{ color: 'var(--ui-text-muted)' }}
                         >
                           {h}
@@ -58,17 +58,17 @@ export function GroupStandings({
                         key={s.participantId}
                         style={{ borderBottom: i < standings.length - 1 ? '1px solid var(--ui-divider)' : 'none' }}
                       >
-                        <td className="px-3 py-2 text-xs font-bold" style={{ color: 'var(--ui-text-muted)' }}>
+                        <td className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--ui-text-muted)' }}>
                           {i + 1}
                         </td>
                         <td className="px-3 py-2 font-medium" style={{ color: 'var(--ui-text-primary)' }}>{s.participantName}</td>
                         <td className="px-3 py-2" style={{ color: 'var(--ui-text-muted)' }}>{s.played}</td>
-                        <td className="px-3 py-2 font-semibold" style={{ color: primaryColor }}>{s.wins}</td>
+                        <td className="px-3 py-2 font-medium" style={{ color: primaryColor }}>{s.wins}</td>
                         <td className="px-3 py-2" style={{ color: 'var(--ui-text-muted)' }}>{s.losses}</td>
                         <td className="px-3 py-2" style={{ color: 'var(--ui-text-muted)' }}>{s.cupsFor}</td>
                         <td className="px-3 py-2" style={{ color: 'var(--ui-text-muted)' }}>{s.cupsAgainst}</td>
                         <td
-                          className="px-3 py-2 font-semibold"
+                          className="px-3 py-2 font-medium"
                           style={{ color: s.diff >= 0 ? primaryColor : 'var(--ui-text-muted)' }}
                         >
                           {s.diff >= 0 ? `+${s.diff}` : s.diff}
