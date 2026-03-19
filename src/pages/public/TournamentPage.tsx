@@ -5,16 +5,18 @@ import { useAuth } from '@/contexts/AuthContext'
 import { TournamentThemeProvider, TournamentBgImage } from '@/components/tournament/TournamentThemeProvider'
 import { ParticipantsTab } from '@/components/tournament/ParticipantsTab'
 import { BracketView } from '@/components/tournament/BracketView'
+import { RulesTab } from '@/components/tournament/RulesTab'
 import { Spinner } from '@/components/ui/Spinner'
-import type { Tournament, Theme, Team, Player, Match, Group } from '@/lib/types'
+import type { Tournament, Theme, Team, Player, Match, Group, Rules } from '@/lib/types'
 
-type Tab = 'participants' | 'bracket'
+type Tab = 'participants' | 'bracket' | 'rules'
 
 export function TournamentPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [theme, setTheme] = useState<Theme | null>(null)
+  const [rules, setRules] = useState<Rules | null>(null)
   const [teams, setTeams] = useState<Team[]>([])
   const [players, setPlayers] = useState<Player[]>([])
   const [groups, setGroups] = useState<Group[]>([])
@@ -80,8 +82,9 @@ export function TournamentPage() {
     setTournament(t)
 
     // Load everything in parallel
-    const [themeRes, teamsRes, playersRes, groupsRes, matchesRes] = await Promise.all([
+    const [themeRes, rulesRes, teamsRes, playersRes, groupsRes, matchesRes] = await Promise.all([
       t.theme_id ? supabase.from('themes').select('*').eq('id', t.theme_id).single() : Promise.resolve({ data: null }),
+      t.rules_id ? supabase.from('rules').select('*').eq('id', t.rules_id).single() : Promise.resolve({ data: null }),
       supabase.from('teams').select('*').eq('tournament_id', id),
       supabase.from('players').select('*').eq('tournament_id', id),
       supabase.from('groups').select('*').eq('tournament_id', id).order('order_index'),
@@ -89,6 +92,7 @@ export function TournamentPage() {
     ])
 
     setTheme(themeRes.data ?? null)
+    setRules(rulesRes.data ?? null)
     setTeams(teamsRes.data ?? [])
     setPlayers(playersRes.data ?? [])
     setGroups(groupsRes.data ?? [])
@@ -128,6 +132,12 @@ export function TournamentPage() {
       groupParticipants[p.group_id].push(p.id)
     }
   })
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: 'participants', label: 'Participants' },
+    { key: 'bracket', label: 'Bracket & Scores' },
+    ...(rules ? [{ key: 'rules' as Tab, label: 'Rules' }] : []),
+  ]
 
   // ── Render ───────────────────────────────────────────────────────────────────
 
@@ -172,19 +182,19 @@ export function TournamentPage() {
           {/* Tabs */}
           <div className="mx-auto max-w-5xl px-4 pb-3">
             <div className="flex gap-1 rounded-xl p-1 w-fit mx-auto" style={{ backgroundColor: 'var(--ui-tab-bg)', border: '1px solid var(--ui-card-border)' }}>
-              {(['participants', 'bracket'] as Tab[]).map(t => (
+              {tabs.map(({ key, label }) => (
                 <button
-                  key={t}
+                  key={key}
                   type="button"
-                  onClick={() => setTab(t)}
-                  className="rounded-lg px-4 py-1.5 text-sm font-medium capitalize transition-colors"
+                  onClick={() => setTab(key)}
+                  className="rounded-lg px-4 py-1.5 text-sm font-medium transition-colors"
                   style={
-                    tab === t
+                    tab === key
                       ? { backgroundColor: primaryColor, color: 'white' }
                       : { color: 'var(--ui-text-muted)' }
                   }
                 >
-                  {t === 'bracket' ? 'Bracket & Scores' : 'Participants'}
+                  {label}
                 </button>
               ))}
             </div>
@@ -193,32 +203,36 @@ export function TournamentPage() {
 
         {/* Content — background image starts here, below the header */}
         <TournamentBgImage theme={theme}>
-        <main className="mx-auto max-w-5xl px-4 py-6">
-          {tab === 'participants' && (
-            <ParticipantsTab
-              participantType={tournament.participant_type}
-              players={players}
-              teams={teams}
-              teamPlayers={teamPlayers}
-              primaryColor={primaryColor}
-            />
-          )}
+          <main className="mx-auto max-w-5xl px-4 py-6">
+            {tab === 'participants' && (
+              <ParticipantsTab
+                participantType={tournament.participant_type}
+                players={players}
+                teams={teams}
+                teamPlayers={teamPlayers}
+                primaryColor={primaryColor}
+              />
+            )}
 
-          {tab === 'bracket' && (
-            <BracketView
-              tournament={tournament}
-              groups={groups}
-              matches={matches}
-              participantNames={participantNames}
-              groupParticipants={groupParticipants}
-              primaryColor={primaryColor}
-              accentColor={accentColor}
-              onMatchUpdated={handleMatchUpdated}
-              isOwner={!!user && user.id === tournament.created_by}
-              onMatchesAdded={newMatches => setMatches(prev => [...prev, ...newMatches])}
-            />
-          )}
-        </main>
+            {tab === 'bracket' && (
+              <BracketView
+                tournament={tournament}
+                groups={groups}
+                matches={matches}
+                participantNames={participantNames}
+                groupParticipants={groupParticipants}
+                primaryColor={primaryColor}
+                accentColor={accentColor}
+                onMatchUpdated={handleMatchUpdated}
+                isOwner={!!user && user.id === tournament.created_by}
+                onMatchesAdded={newMatches => setMatches(prev => [...prev, ...newMatches])}
+              />
+            )}
+
+            {tab === 'rules' && rules && (
+              <RulesTab rules={rules} primaryColor={primaryColor} />
+            )}
+          </main>
         </TournamentBgImage>
       </div>
     </TournamentThemeProvider>

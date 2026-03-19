@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { WizardStep1 } from '@/components/wizard/WizardStep1'
 import { WizardStep2 } from '@/components/wizard/WizardStep2'
 import { useThemes } from '@/hooks/useThemes'
+import { useRules } from '@/hooks/useRules'
 import { supabase } from '@/lib/supabase'
 import { localId } from '@/lib/utils'
 import {
@@ -28,6 +29,7 @@ const step1Schema = z.object({
   num_groups: z.number().int().min(0).default(0),
   players_advancing_per_group: z.number().int().min(0).default(0),
   theme_id: z.string().default(''),
+  rules_id: z.string().default(''),
   start_date: z.string().default(''),
   participants: z.array(z.object({
     id: z.string(),
@@ -47,6 +49,7 @@ export function NewTournamentPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { themes } = useThemes()
+  const { rules } = useRules()
   const [step, setStep] = useState(1)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -61,6 +64,7 @@ export function NewTournamentPage() {
       num_groups: 2,
       players_advancing_per_group: 2,
       theme_id: '',
+      rules_id: '',
       start_date: '',
       participants: [],
     },
@@ -106,6 +110,7 @@ export function NewTournamentPage() {
           participant_type: data.participant_type,
           status: 'draft',
           theme_id: data.theme_id || null,
+          rules_id: data.rules_id || null,
           start_date: data.start_date || null,
           num_participants: data.num_participants,
           num_groups: data.type !== 'single_elimination' ? data.num_groups : null,
@@ -292,7 +297,7 @@ export function NewTournamentPage() {
       {/* Form card */}
       <div className="rounded-2xl border border-gray-200 bg-white p-8 dark:border-dark-600 dark:bg-dark-800">
         <FormProvider {...methods}>
-          {step === 1 && <WizardStep1 themes={themes} />}
+          {step === 1 && <WizardStep1 themes={themes} rules={rules} />}
           {step === 2 && <WizardStep2 />}
         </FormProvider>
 

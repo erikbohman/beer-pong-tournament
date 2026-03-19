@@ -7,6 +7,7 @@ import { TournamentsPage } from '@/pages/admin/TournamentsPage'
 import { NewTournamentPage } from '@/pages/admin/NewTournamentPage'
 import { EditTournamentPage } from '@/pages/admin/EditTournamentPage'
 import { ThemesPage } from '@/pages/admin/ThemesPage'
+import { RulesPage } from '@/pages/admin/RulesPage'
 import { TournamentPage } from '@/pages/public/TournamentPage'
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
               <Route path="tournaments/new" element={<NewTournamentPage />} />
               <Route path="tournaments/:id/edit" element={<EditTournamentPage />} />
               <Route path="themes" element={<ThemesPage />} />
+              <Route path="rules" element={<RulesPage />} />
             </Route>
           </Route>
 

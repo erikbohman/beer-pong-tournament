@@ -2,14 +2,14 @@ import { useFormContext } from 'react-hook-form'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Label } from '@/components/ui/Label'
-import type { WizardFormData } from '@/lib/types'
-import type { Theme } from '@/lib/types'
+import type { WizardFormData, Theme, Rules } from '@/lib/types'
 
 interface WizardStep1Props {
   themes: Theme[]
+  rules: Rules[]
 }
 
-export function WizardStep1({ themes }: WizardStep1Props) {
+export function WizardStep1({ themes, rules }: WizardStep1Props) {
   const {
     register,
     watch,
@@ -127,6 +127,18 @@ export function WizardStep1({ themes }: WizardStep1Props) {
         {themes.map(t => (
           <option key={t.id} value={t.id}>
             {t.name}
+          </option>
+        ))}
+      </Select>
+
+      <Select
+        label="Rules (optional)"
+        placeholder="No rules selected"
+        {...register('rules_id')}
+      >
+        {rules.map(r => (
+          <option key={r.id} value={r.id}>
+            {r.name}
           </option>
         ))}
       </Select>

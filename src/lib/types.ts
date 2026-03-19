@@ -8,6 +8,14 @@ export type ParticipantKind = 'team' | 'player'
 
 // ─── Database Row Types ───────────────────────────────────────────────────────
 
+export interface Rules {
+  id: string
+  name: string
+  content: string
+  created_at: string
+  updated_at: string
+}
+
 export interface Theme {
   id: string
   name: string
@@ -30,6 +38,7 @@ export interface Tournament {
   participant_type: ParticipantType
   status: TournamentStatus
   theme_id: string | null
+  rules_id: string | null
   start_date: string | null
   num_participants: number
   num_groups: number | null
@@ -102,7 +111,9 @@ export interface WizardFormData {
   num_groups: number
   players_advancing_per_group: number
   theme_id: string
+  rules_id: string
   start_date: string
+
   participants: ParticipantEntry[]
 }
 
