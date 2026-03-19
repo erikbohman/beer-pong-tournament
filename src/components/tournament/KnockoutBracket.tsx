@@ -61,13 +61,14 @@ export function KnockoutBracket({
           {/* Round labels — shared row above all columns */}
           <div className="flex gap-6 mb-3">
             {rounds.map(({ round }) => (
-              <p
-                key={round}
-                className="w-44 text-center text-xs font-bold uppercase tracking-widest"
-                style={{ color: primaryColor }}
-              >
-                {getRoundLabel(round, maxRound)}
-              </p>
+              <div key={round} className="flex w-44 justify-center">
+                <span
+                  className="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest"
+                  style={{ color: primaryColor, backgroundColor: 'var(--ui-card-bg)', border: '1px solid var(--ui-card-border)' }}
+                >
+                  {getRoundLabel(round, maxRound)}
+                </span>
+              </div>
             ))}
           </div>
 

@@ -126,12 +126,14 @@ export function BracketView({
                   if (gMatches.length === 0) return null
                   return (
                     <div key={group.id} className="flex w-44 flex-col gap-3">
-                      <p
-                        className="text-center text-xs font-bold uppercase tracking-widest"
-                        style={{ color: primaryColor }}
-                      >
-                        {group.name}
-                      </p>
+                      <div className="flex justify-center">
+                        <span
+                          className="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest"
+                          style={{ color: primaryColor, backgroundColor: 'var(--ui-card-bg)', border: '1px solid var(--ui-card-border)' }}
+                        >
+                          {group.name}
+                        </span>
+                      </div>
                       {gMatches.map(match => (
                         <MatchCard
                           key={match.id}
@@ -215,12 +217,14 @@ export function BracketView({
                     if (gMatches.length === 0) return null
                     return (
                       <div key={group.id} className="flex w-44 flex-col gap-3">
-                        <p
-                          className="text-center text-xs font-bold uppercase tracking-widest"
-                          style={{ color: primaryColor }}
-                        >
-                          {group.name}
-                        </p>
+                        <div className="flex justify-center">
+                          <span
+                            className="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest"
+                            style={{ color: primaryColor, backgroundColor: 'var(--ui-card-bg)', border: '1px solid var(--ui-card-border)' }}
+                          >
+                            {group.name}
+                          </span>
+                        </div>
                         {gMatches.map(match => (
                           <MatchCard
                             key={match.id}

@@ -29,12 +29,14 @@ export function GroupStandings({
 
           return (
             <div key={group.id}>
-              <h3
-                className="mb-2 text-sm font-bold uppercase tracking-widest"
-                style={{ color: primaryColor }}
-              >
-                {group.name}
-              </h3>
+              <div className="mb-2">
+                <span
+                  className="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest"
+                  style={{ color: primaryColor, backgroundColor: 'var(--ui-card-bg)', border: '1px solid var(--ui-card-border)' }}
+                >
+                  {group.name}
+                </span>
+              </div>
               <div className="overflow-hidden rounded-xl" style={{ backgroundColor: 'var(--ui-card-bg)', border: '1px solid var(--ui-card-border)' }}>
                 <table className="w-full text-sm">
                   <thead>
