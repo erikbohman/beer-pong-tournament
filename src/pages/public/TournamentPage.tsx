@@ -1,0 +1,226 @@
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
+import { TournamentThemeProvider, TournamentBgImage } from '@/components/tournament/TournamentThemeProvider'
+import { ParticipantsTab } from '@/components/tournament/ParticipantsTab'
+import { BracketView } from '@/components/tournament/BracketView'
+import { Spinner } from '@/components/ui/Spinner'
+import type { Tournament, Theme, Team, Player, Match, Group } from '@/lib/types'
+
+type Tab = 'participants' | 'bracket'
+
+export function TournamentPage() {
+  const { id } = useParams<{ id: string }>()
+  const { user } = useAuth()
+  const [tournament, setTournament] = useState<Tournament | null>(null)
+  const [theme, setTheme] = useState<Theme | null>(null)
+  const [teams, setTeams] = useState<Team[]>([])
+  const [players, setPlayers] = useState<Player[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
+  const [matches, setMatches] = useState<Match[]>([])
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+  const [tab, setTab] = useState<Tab>('participants')
+
+  useEffect(() => {
+    if (!id) return
+    loadTournament()
+  }, [id])
+
+  // Realtime subscription for match updates
+  useEffect(() => {
+    if (!id) return
+    const channel = supabase
+      .channel(`tournament-matches:${id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'matches', filter: `tournament_id=eq.${id}` },
+        payload => {
+          setMatches(prev =>
+            prev.map(m => (m.id === (payload.new as Match).id ? (payload.new as Match) : m))
+          )
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [id])
+
+  // Realtime subscription for theme updates
+  useEffect(() => {
+    if (!tournament?.theme_id) return
+    const channel = supabase
+      .channel(`tournament-theme:${tournament.theme_id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'themes', filter: `id=eq.${tournament.theme_id}` },
+        payload => setTheme(payload.new as Theme)
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [tournament?.theme_id])
+
+  async function loadTournament() {
+    setLoading(true)
+    const { data: t, error } = await supabase
+      .from('tournaments')
+      .select('*')
+      .eq('id', id)
+      .eq('status', 'published')
+      .single()
+
+    if (error || !t) {
+      setNotFound(true)
+      setLoading(false)
+      return
+    }
+
+    setTournament(t)
+
+    // Load everything in parallel
+    const [themeRes, teamsRes, playersRes, groupsRes, matchesRes] = await Promise.all([
+      t.theme_id ? supabase.from('themes').select('*').eq('id', t.theme_id).single() : Promise.resolve({ data: null }),
+      supabase.from('teams').select('*').eq('tournament_id', id),
+      supabase.from('players').select('*').eq('tournament_id', id),
+      supabase.from('groups').select('*').eq('tournament_id', id).order('order_index'),
+      supabase.from('matches').select('*').eq('tournament_id', id).order('round').order('match_number'),
+    ])
+
+    setTheme(themeRes.data ?? null)
+    setTeams(teamsRes.data ?? [])
+    setPlayers(playersRes.data ?? [])
+    setGroups(groupsRes.data ?? [])
+    setMatches(matchesRes.data ?? [])
+    setLoading(false)
+  }
+
+  function handleMatchUpdated(updated: Match) {
+    setMatches(prev => prev.map(m => (m.id === updated.id ? updated : m)))
+  }
+
+  // ── Derived data ─────────────────────────────────────────────────────────────
+
+  const primaryColor = theme?.primary_color ?? '#f97316'
+  const accentColor = theme?.accent_color ?? '#fbbf24'
+
+  // Map participant IDs to names
+  const participantNames: Record<string, string> = {}
+  teams.forEach(t => { participantNames[t.id] = t.name })
+  players.forEach(p => { participantNames[p.id] = p.name })
+
+  // Team → players map
+  const teamPlayers: Record<string, Player[]> = {}
+  players.forEach(p => {
+    if (p.team_id) {
+      if (!teamPlayers[p.team_id]) teamPlayers[p.team_id] = []
+      teamPlayers[p.team_id].push(p)
+    }
+  })
+
+  // Group → participant IDs
+  const groupParticipants: Record<string, string[]> = {}
+  const allParticipants = tournament?.participant_type === 'teams' ? teams : players
+  allParticipants.forEach(p => {
+    if (p.group_id) {
+      if (!groupParticipants[p.group_id]) groupParticipants[p.group_id] = []
+      groupParticipants[p.group_id].push(p.id)
+    }
+  })
+
+  // ── Render ───────────────────────────────────────────────────────────────────
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-900">
+        <Spinner size="lg" />
+      </div>
+    )
+  }
+
+  if (notFound || !tournament) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-900">
+        <div className="text-center">
+          <p className="text-2xl font-bold text-white">Tournament not found</p>
+          <p className="mt-2 text-sm text-gray-400">This tournament may not be published yet.</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <TournamentThemeProvider theme={theme}>
+      <div className="flex min-h-dvh flex-col">
+        {/* Header */}
+        <header className="sticky top-0 z-10" style={{ backgroundColor: theme?.background_color ?? '#111827', borderBottom: '1px solid var(--ui-divider)' }}>
+          <div className="mx-auto max-w-5xl px-4 py-4">
+            <div className="flex items-center gap-3 justify-center">
+              {theme?.logo_url && (
+                <img src={theme.logo_url} alt="Logo" className="h-8 w-8 rounded object-contain" />
+              )}
+              <h1
+                className="text-xl font-bold truncate"
+                style={{ color: primaryColor }}
+              >
+                {tournament.name}
+              </h1>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mx-auto max-w-5xl px-4 pb-3">
+            <div className="flex gap-1 rounded-xl p-1 w-fit mx-auto" style={{ backgroundColor: 'var(--ui-tab-bg)', border: '1px solid var(--ui-card-border)' }}>
+              {(['participants', 'bracket'] as Tab[]).map(t => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTab(t)}
+                  className="rounded-lg px-4 py-1.5 text-sm font-semibold capitalize transition-colors"
+                  style={
+                    tab === t
+                      ? { backgroundColor: primaryColor, color: 'white' }
+                      : { color: 'var(--ui-text-muted)' }
+                  }
+                >
+                  {t === 'bracket' ? 'Bracket & Scores' : 'Participants'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </header>
+
+        {/* Content — background image starts here, below the header */}
+        <TournamentBgImage theme={theme}>
+        <main className="mx-auto max-w-5xl px-4 py-6">
+          {tab === 'participants' && (
+            <ParticipantsTab
+              participantType={tournament.participant_type}
+              players={players}
+              teams={teams}
+              teamPlayers={teamPlayers}
+              primaryColor={primaryColor}
+            />
+          )}
+
+          {tab === 'bracket' && (
+            <BracketView
+              tournament={tournament}
+              groups={groups}
+              matches={matches}
+              participantNames={participantNames}
+              groupParticipants={groupParticipants}
+              primaryColor={primaryColor}
+              accentColor={accentColor}
+              onMatchUpdated={handleMatchUpdated}
+              isOwner={!!user && user.id === tournament.created_by}
+              onMatchesAdded={newMatches => setMatches(prev => [...prev, ...newMatches])}
+            />
+          )}
+        </main>
+        </TournamentBgImage>
+      </div>
+    </TournamentThemeProvider>
+  )
+}
