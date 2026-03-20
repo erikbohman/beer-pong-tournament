@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MatchCard } from './MatchCard'
 import { ScoreModal } from './ScoreModal'
 import { getNextRoundMatchInfo } from '@/lib/bracketUtils'
@@ -21,6 +21,40 @@ export function KnockoutBracket({
   onMatchUpdated,
 }: KnockoutBracketProps) {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null)
+
+  // Auto-advance BYE winners that haven't been forwarded yet (fixes existing brackets)
+  useEffect(() => {
+    const knockouts = matches.filter(m => m.stage === 'knockout')
+    const byeMatches = knockouts.filter(m => m.winner_id && !m.participant2_id)
+
+    for (const byeMatch of byeMatches) {
+      const next = getNextRoundMatchInfo(byeMatch, matches)
+      if (!next) continue
+
+      // Check if the next-round slot is already filled
+      const nextMatch = knockouts.find(m => m.id === next.matchId)
+      if (!nextMatch) continue
+      const alreadyFilled = next.slot === 1 ? nextMatch.participant1_id : nextMatch.participant2_id
+      if (alreadyFilled) continue
+
+      // Advance the BYE winner
+      const winnerId = byeMatch.winner_id!
+      const winnerType = byeMatch.winner_type
+      const updatePayload = next.slot === 1
+        ? { participant1_id: winnerId, participant1_type: winnerType }
+        : { participant2_id: winnerId, participant2_type: winnerType }
+
+      supabase
+        .from('matches')
+        .update(updatePayload)
+        .eq('id', next.matchId)
+        .select()
+        .single()
+        .then(({ data }) => {
+          if (data) onMatchUpdated(data as Match)
+        })
+    }
+  }, [matches])
 
   const knockoutMatches = matches
     .filter(m => m.stage === 'knockout')

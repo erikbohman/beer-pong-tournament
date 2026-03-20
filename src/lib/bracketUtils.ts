@@ -101,6 +101,28 @@ export function generateSingleEliminationMatches(
     }
   }
 
+  // Auto-advance BYE winners into next-round slots
+  const r1Matches = matches.filter(m => m.round === 1)
+  const r2Matches = matches.filter(m => m.round === 2)
+
+  r1Matches.forEach((m, idx) => {
+    if (m.winner_id && !m.participant2_id) {
+      // This is a BYE — advance the winner to round 2
+      const nextMatchIndex = Math.floor(idx / 2)
+      const slot = idx % 2 === 0 ? 1 : 2
+      const nextMatch = r2Matches[nextMatchIndex]
+      if (nextMatch) {
+        if (slot === 1) {
+          nextMatch.participant1_id = m.winner_id
+          nextMatch.participant1_type = m.winner_type
+        } else {
+          nextMatch.participant2_id = m.winner_id
+          nextMatch.participant2_type = m.winner_type
+        }
+      }
+    }
+  })
+
   return matches
 }
 
