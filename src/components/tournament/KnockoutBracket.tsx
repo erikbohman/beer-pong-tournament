@@ -161,25 +161,58 @@ export function KnockoutBracket({
             onMatchUpdated(updatedMatch)
             setSelectedMatch(null)
 
-            // Auto-advance winner to next round
-            const next = getNextRoundMatchInfo(updatedMatch, matches)
-            if (!next) return
+            // Cascade: advance winner + clear stale downstream results
+            let currentMatch = updatedMatch
+            let latestMatches = matches.map(m => m.id === updatedMatch.id ? updatedMatch : m)
 
-            const winnerId = updatedMatch.winner_id!
-            const winnerType = updatedMatch.winner_type
+            while (true) {
+              const next = getNextRoundMatchInfo(currentMatch, latestMatches)
+              if (!next) break
 
-            const updatePayload = next.slot === 1
-              ? { participant1_id: winnerId, participant1_type: winnerType }
-              : { participant2_id: winnerId, participant2_type: winnerType }
+              const winnerId = currentMatch.winner_id!
+              const winnerType = currentMatch.winner_type
 
-            const { data } = await supabase
-              .from('matches')
-              .update(updatePayload)
-              .eq('id', next.matchId)
-              .select()
-              .single()
+              const nextMatch = latestMatches.find(m => m.id === next.matchId)
+              if (!nextMatch) break
 
-            if (data) onMatchUpdated(data as Match)
+              // Check if the participant in this slot actually changed
+              const currentSlotValue = next.slot === 1 ? nextMatch.participant1_id : nextMatch.participant2_id
+              const slotChanged = currentSlotValue !== winnerId
+
+              // Build update: always set the participant slot
+              const updatePayload: Record<string, unknown> = next.slot === 1
+                ? { participant1_id: winnerId, participant1_type: winnerType }
+                : { participant2_id: winnerId, participant2_type: winnerType }
+
+              // If slot changed, also clear winner/scores (result is now invalid)
+              if (slotChanged && nextMatch.winner_id) {
+                updatePayload.winner_id = null
+                updatePayload.winner_type = null
+                updatePayload.participant1_cups = null
+                updatePayload.participant2_cups = null
+              }
+
+              const { data } = await supabase
+                .from('matches')
+                .update(updatePayload)
+                .eq('id', next.matchId)
+                .select()
+                .single()
+
+              if (!data) break
+
+              const updatedNext = data as Match
+              onMatchUpdated(updatedNext)
+              latestMatches = latestMatches.map(m => m.id === updatedNext.id ? updatedNext : m)
+
+              // If we cleared the winner, cascade further to clear downstream
+              if (slotChanged && nextMatch.winner_id) {
+                currentMatch = updatedNext
+                continue
+              }
+
+              break
+            }
           }}
         />
       )}
