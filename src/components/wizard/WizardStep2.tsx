@@ -77,7 +77,7 @@ export function WizardStep2() {
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3">
         <div>
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
             {participantType === 'teams' ? 'Enter Teams & Players' : 'Enter Players'}
@@ -86,28 +86,28 @@ export function WizardStep2() {
             Drag to reorder seeding. {participantType === 'teams' && 'Expand each team to add individual players.'}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {participantType === 'teams' ? (
             <>
-              <Button variant="outline" size="sm" type="button" onClick={() => setAllExpanded(!allExpanded)}>
+              <Button variant="outline" size="sm" type="button" className="min-h-9" onClick={() => setAllExpanded(!allExpanded)}>
                 {allExpanded ? <ChevronsDownUp size={14} /> : <ChevronsUpDown size={14} />}
                 {allExpanded ? 'Collapse' : 'Expand'}
               </Button>
-              <Button variant="outline" size="sm" type="button" onClick={() => setShowFill(true)}>
+              <Button variant="outline" size="sm" type="button" className="min-h-9" onClick={() => setShowFill(true)}>
                 <Users size={14} />
                 Fill Players
               </Button>
-              <Button variant="outline" size="sm" type="button" onClick={handleShufflePlayers}>
+              <Button variant="outline" size="sm" type="button" className="min-h-9" onClick={handleShufflePlayers}>
                 <Shuffle size={14} />
                 Shuffle Players
               </Button>
-              <Button variant="outline" size="sm" type="button" onClick={handleShuffleTeams}>
+              <Button variant="outline" size="sm" type="button" className="min-h-9" onClick={handleShuffleTeams}>
                 <Shuffle size={14} />
                 Shuffle Teams
               </Button>
             </>
           ) : (
-            <Button variant="outline" size="sm" type="button" onClick={handleShuffleTeams}>
+            <Button variant="outline" size="sm" type="button" className="min-h-9" onClick={handleShuffleTeams}>
               <Shuffle size={14} />
               Shuffle
             </Button>
