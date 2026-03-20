@@ -18,7 +18,7 @@ export function RulesTab({ rules, primaryColor }: RulesTabProps) {
         {rules.name}
       </h2>
       <p
-        className="text-sm leading-relaxed"
+        className="text-base leading-relaxed"
         style={{ color: 'var(--ui-text-primary)', whiteSpace: 'pre-wrap' }}
       >
         {rules.content}
