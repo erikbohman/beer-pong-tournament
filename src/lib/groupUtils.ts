@@ -34,23 +34,19 @@ export function calculateStandings(
 
     const loserId = winner_id === p1 ? p2 : p1
 
+    // loser's cups left = margin of victory
+    const loserCupsLeft = winner_id === p1 ? (participant2_cups ?? 0) : (participant1_cups ?? 0)
+
     if (stats[winner_id]) {
       stats[winner_id].played++
       stats[winner_id].wins++
-      // Winner's cups = cups they had remaining; against = cups opponent had remaining
-      const winnerCups = winner_id === p1 ? (participant1_cups ?? 0) : (participant2_cups ?? 0)
-      const loserCups = winner_id === p1 ? (participant2_cups ?? 0) : (participant1_cups ?? 0)
-      stats[winner_id].cupsFor += winnerCups
-      stats[winner_id].cupsAgainst += loserCups
+      stats[winner_id].cupsFor += loserCupsLeft
     }
 
     if (stats[loserId]) {
       stats[loserId].played++
       stats[loserId].losses++
-      const loserCups = loserId === p1 ? (participant1_cups ?? 0) : (participant2_cups ?? 0)
-      const winnerCups = loserId === p1 ? (participant2_cups ?? 0) : (participant1_cups ?? 0)
-      stats[loserId].cupsFor += loserCups
-      stats[loserId].cupsAgainst += winnerCups
+      stats[loserId].cupsAgainst += loserCupsLeft
     }
   }
 
