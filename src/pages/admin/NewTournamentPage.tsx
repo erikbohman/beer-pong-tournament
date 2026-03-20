@@ -79,10 +79,11 @@ export function NewTournamentPage() {
     // Initialize participant slots if moving to step 2
     const count = getValues('num_participants')
     const existing = getValues('participants')
+    const pType = getValues('participant_type')
     if (existing.length !== count) {
       const slots: ParticipantEntry[] = Array.from({ length: count }, (_, i) => ({
         id: existing[i]?.id ?? localId(),
-        name: existing[i]?.name ?? '',
+        name: existing[i]?.name || (pType === 'teams' ? `Team ${i + 1}` : `Player ${i + 1}`),
         playerNames: existing[i]?.playerNames ?? [],
       }))
       setValue('participants', slots)

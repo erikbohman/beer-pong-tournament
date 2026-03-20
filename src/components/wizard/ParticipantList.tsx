@@ -1,4 +1,4 @@
-import { useFieldArray, useFormContext } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import {
   DndContext,
   closestCenter,
@@ -16,7 +16,6 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, ChevronDown, ChevronUp } from 'lucide-react'
-import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import type { WizardFormData } from '@/lib/types'
 
@@ -24,11 +23,11 @@ interface SortableItemProps {
   id: string
   index: number
   participantType: 'players' | 'teams'
+  expanded: boolean
 }
 
-function SortableItem({ id, index, participantType }: SortableItemProps) {
+function SortableItem({ id, index, participantType, expanded }: SortableItemProps) {
   const { register } = useFormContext<WizardFormData>()
-  const [expanded, setExpanded] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
   const style: React.CSSProperties = {
@@ -67,13 +66,9 @@ function SortableItem({ id, index, participantType }: SortableItemProps) {
         />
 
         {participantType === 'teams' && (
-          <button
-            type="button"
-            onClick={() => setExpanded(!expanded)}
-            className="rounded p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-          >
+          <span className="text-gray-300 dark:text-dark-600">
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </button>
+          </span>
         )}
       </div>
 
@@ -102,11 +97,12 @@ function SortableItem({ id, index, participantType }: SortableItemProps) {
 interface ParticipantListProps {
   groupIndex?: number
   groupName?: string
+  move: (from: number, to: number) => void
+  allExpanded?: boolean
 }
 
-export function ParticipantList({ groupIndex, groupName }: ParticipantListProps) {
-  const { watch, control } = useFormContext<WizardFormData>()
-  const { move } = useFieldArray({ control, name: 'participants' })
+export function ParticipantList({ groupIndex, groupName, move, allExpanded = true }: ParticipantListProps) {
+  const { watch } = useFormContext<WizardFormData>()
 
   const participantType = watch('participant_type')
   const participants = watch('participants') ?? []
@@ -158,6 +154,7 @@ export function ParticipantList({ groupIndex, groupName }: ParticipantListProps)
                 id={item.id}
                 index={item.originalIndex}
                 participantType={participantType}
+                expanded={allExpanded}
               />
             ))}
           </div>

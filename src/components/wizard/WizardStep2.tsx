@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
-import { Shuffle, Users } from 'lucide-react'
+import { useFormContext, useFieldArray } from 'react-hook-form'
+import { Shuffle, Users, ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { ParticipantList } from './ParticipantList'
 import { BracketPreview } from './BracketPreview'
@@ -9,7 +9,8 @@ import { shuffleArray } from '@/lib/utils'
 import type { WizardFormData, ParticipantEntry } from '@/lib/types'
 
 export function WizardStep2() {
-  const { watch, setValue } = useFormContext<WizardFormData>()
+  const { watch, control } = useFormContext<WizardFormData>()
+  const { replace, move } = useFieldArray({ control, name: 'participants' })
 
   const type = watch('type')
   const participantType = watch('participant_type')
@@ -20,23 +21,28 @@ export function WizardStep2() {
 
   const [showFill, setShowFill] = useState(false)
   const [playerListText, setPlayerListText] = useState('')
+  const [allExpanded, setAllExpanded] = useState(true)
 
   function handleShuffleTeams() {
-    setValue('participants', shuffleArray<ParticipantEntry>(participants))
+    replace(shuffleArray<ParticipantEntry>(participants))
   }
 
   function handleShufflePlayers() {
-    // Collect all player names across all teams, shuffle, redistribute evenly
+    // Collect all non-empty player names across all teams, shuffle, redistribute evenly
     const allPlayers = participants.flatMap(t => (t.playerNames ?? []).filter(Boolean))
     const shuffled = shuffleArray<string>(allPlayers)
-    const updated = participants.map(t => ({ ...t, playerNames: [] as string[] }))
+    // New IDs force React to remount SortableItems so uncontrolled inputs pick up new values
+    const updated = participants.map(t => ({
+      ...t,
+      id: crypto.randomUUID(),
+      playerNames: ['', '', '', ''],
+    }))
     shuffled.forEach((name, i) => {
       const teamIndex = i % updated.length
-      if (updated[teamIndex].playerNames.length < 4) {
-        updated[teamIndex].playerNames.push(name)
-      }
+      const slot = updated[teamIndex].playerNames.findIndex(n => n === '')
+      if (slot !== -1) updated[teamIndex].playerNames[slot] = name
     })
-    setValue('participants', updated)
+    replace(updated)
   }
 
   function handleFillPlayers() {
@@ -50,15 +56,18 @@ export function WizardStep2() {
       return
     }
 
-    const updated = participants.map(t => ({ ...t, playerNames: [] as string[] }))
+    const updated = participants.map(t => ({
+      ...t,
+      id: crypto.randomUUID(),
+      playerNames: ['', '', '', ''],
+    }))
     names.forEach((name, i) => {
       const teamIndex = i % updated.length
-      if (updated[teamIndex].playerNames.length < 4) {
-        updated[teamIndex].playerNames.push(name)
-      }
+      const slot = updated[teamIndex].playerNames.findIndex(n => n === '')
+      if (slot !== -1) updated[teamIndex].playerNames[slot] = name
     })
 
-    setValue('participants', updated)
+    replace(updated)
     setPlayerListText('')
     setShowFill(false)
   }
@@ -80,6 +89,10 @@ export function WizardStep2() {
         <div className="flex gap-2">
           {participantType === 'teams' ? (
             <>
+              <Button variant="outline" size="sm" type="button" onClick={() => setAllExpanded(!allExpanded)}>
+                {allExpanded ? <ChevronsDownUp size={14} /> : <ChevronsUpDown size={14} />}
+                {allExpanded ? 'Collapse' : 'Expand'}
+              </Button>
               <Button variant="outline" size="sm" type="button" onClick={() => setShowFill(true)}>
                 <Users size={14} />
                 Fill Players
@@ -135,7 +148,7 @@ export function WizardStep2() {
       )}
 
       {/* Participant list */}
-      <ParticipantList />
+      <ParticipantList move={move} allExpanded={allExpanded} />
 
       {/* Live preview */}
       <div className="rounded-xl border border-gray-200 p-4 dark:border-dark-600">
