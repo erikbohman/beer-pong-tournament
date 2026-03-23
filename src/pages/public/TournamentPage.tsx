@@ -3,8 +3,8 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { TournamentThemeProvider, TournamentBgImage } from '@/components/tournament/TournamentThemeProvider'
-import { ParticipantsTab } from '@/components/tournament/ParticipantsTab'
 import { BracketView } from '@/components/tournament/BracketView'
+import { ParticipantsTab } from '@/components/tournament/ParticipantsTab'
 import { RulesTab } from '@/components/tournament/RulesTab'
 import { Spinner } from '@/components/ui/Spinner'
 import type { Tournament, Theme, Team, Player, Match, Group, Rules } from '@/lib/types'
@@ -23,7 +23,7 @@ export function TournamentPage() {
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
-  const [tab, setTab] = useState<Tab>('participants')
+  const [tab, setTab] = useState<Tab>('bracket')
 
   useEffect(() => {
     if (!id) return
@@ -133,8 +133,8 @@ export function TournamentPage() {
     }
   })
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: 'participants', label: 'Participants' },
+  const tabs: { key: Tab; label: string; mobileOnly?: boolean }[] = [
+    { key: 'participants', label: 'Participants', mobileOnly: true },
     { key: 'bracket', label: 'Bracket & Scores' },
     ...(rules ? [{ key: 'rules' as Tab, label: 'Rules' }] : []),
   ]
@@ -182,12 +182,12 @@ export function TournamentPage() {
           {/* Tabs */}
           <div className="mx-auto max-w-5xl px-4 pb-3">
             <div className="flex gap-1 rounded-xl p-1 w-fit mx-auto" style={{ backgroundColor: 'var(--ui-tab-bg)', border: '1px solid var(--ui-card-border)' }}>
-              {tabs.map(({ key, label }) => (
+              {tabs.map(({ key, label, mobileOnly }) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setTab(key)}
-                  className="rounded-lg px-4 py-1.5 text-sm font-medium transition-colors"
+                  className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors${mobileOnly ? ' sm:hidden' : ''}`}
                   style={
                     tab === key
                       ? { backgroundColor: primaryColor, color: 'white' }
@@ -206,7 +206,7 @@ export function TournamentPage() {
           <main className="mx-auto max-w-5xl px-4 py-6">
             {tab === 'participants' && (
               <ParticipantsTab
-                participantType={tournament.participant_type}
+                participantType={tournament.participant_type === 'teams' ? 'teams' : 'players'}
                 players={players}
                 teams={teams}
                 teamPlayers={teamPlayers}
@@ -226,6 +226,8 @@ export function TournamentPage() {
                 onMatchUpdated={handleMatchUpdated}
                 isOwner={!!user && user.id === tournament.created_by}
                 onMatchesAdded={newMatches => setMatches(prev => [...prev, ...newMatches])}
+                players={players}
+                teams={teams}
               />
             )}
 
