@@ -166,6 +166,8 @@ export function BracketView({
           <KnockoutBracket
             matches={matches}
             participantNames={participantNames}
+            teamPlayers={teamPlayers}
+            players={players}
             primaryColor={primaryColor}
             accentColor={accentColor}
             onMatchUpdated={onMatchUpdated}
@@ -360,6 +362,8 @@ export function BracketView({
             <KnockoutBracket
               matches={matches}
               participantNames={participantNames}
+              teamPlayers={teamPlayers}
+              players={players}
               primaryColor={primaryColor}
               accentColor={accentColor}
               onMatchUpdated={onMatchUpdated}

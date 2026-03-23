@@ -9,6 +9,7 @@ interface ScoreModalProps {
   participant2Name: string
   primaryColor: string
   accentColor: string
+  skipCups?: boolean
   onClose: () => void
   onSaved: (updatedMatch: Match) => void
 }
@@ -19,6 +20,7 @@ export function ScoreModal({
   participant2Name,
   primaryColor,
   accentColor,
+  skipCups = false,
   onClose,
   onSaved,
 }: ScoreModalProps) {
@@ -26,26 +28,25 @@ export function ScoreModal({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const step = winnerId ? 'cups' : 'winner'
+  const step = !skipCups && winnerId ? 'cups' : 'winner'
 
   const loserName = winnerId === match.participant1_id ? participant2Name : participant1Name
 
-  async function handleCupsSelect(loserCups: number) {
-    if (!winnerId) return
+  async function saveResult(selectedWinnerId: string, loserCups: number | null) {
     setSaving(true)
     setError(null)
 
-    const winnerType: ParticipantKind | null = winnerId === match.participant1_id
+    const winnerType: ParticipantKind | null = selectedWinnerId === match.participant1_id
       ? match.participant1_type
       : match.participant2_type
 
-    const p1Cups = winnerId === match.participant1_id ? 0 : loserCups
-    const p2Cups = winnerId === match.participant2_id ? 0 : loserCups
+    const p1Cups = loserCups === null ? null : selectedWinnerId === match.participant1_id ? 0 : loserCups
+    const p2Cups = loserCups === null ? null : selectedWinnerId === match.participant2_id ? 0 : loserCups
 
     const { data, error: updateErr } = await supabase
       .from('matches')
       .update({
-        winner_id: winnerId,
+        winner_id: selectedWinnerId,
         winner_type: winnerType,
         participant1_cups: p1Cups,
         participant2_cups: p2Cups,
@@ -63,6 +64,19 @@ export function ScoreModal({
     onSaved(data as Match)
     setSaving(false)
     onClose()
+  }
+
+  async function handleWinnerSelect(id: string) {
+    if (skipCups) {
+      await saveResult(id, null)
+    } else {
+      setWinnerId(id)
+    }
+  }
+
+  async function handleCupsSelect(loserCups: number) {
+    if (!winnerId) return
+    await saveResult(winnerId, loserCups)
   }
 
   return (
@@ -88,7 +102,7 @@ export function ScoreModal({
                 <button
                   key={id}
                   type="button"
-                  onClick={() => setWinnerId(id)}
+                  onClick={() => handleWinnerSelect(id)}
                   className="flex flex-col items-center justify-center rounded-xl p-5 transition-all active:scale-95"
                   style={{
                     backgroundColor: 'var(--ui-button-bg)',

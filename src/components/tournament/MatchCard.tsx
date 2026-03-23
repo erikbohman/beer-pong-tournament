@@ -5,10 +5,11 @@ interface MatchCardProps {
   participant1Name: string
   participant2Name: string
   primaryColor: string
+  showCups?: boolean
   onClick: () => void
 }
 
-export function MatchCard({ match, participant1Name, participant2Name, primaryColor, onClick }: MatchCardProps) {
+export function MatchCard({ match, participant1Name, participant2Name, primaryColor, showCups = true, onClick }: MatchCardProps) {
   const isComplete = !!match.winner_id
   const p1Wins = match.winner_id === match.participant1_id
   const p2Wins = match.winner_id === match.participant2_id
@@ -34,7 +35,7 @@ export function MatchCard({ match, participant1Name, participant2Name, primaryCo
         >
           {participant1Name || 'TBD'}
         </span>
-        {isComplete && (
+        {isComplete && showCups && (
           <span className="text-xs font-medium" style={{ color: p1Wins ? primaryColor : 'var(--ui-text-faint)' }}>
             {match.participant1_cups ?? 0}
           </span>
@@ -52,7 +53,7 @@ export function MatchCard({ match, participant1Name, participant2Name, primaryCo
         >
           {participant2Name || 'TBD'}
         </span>
-        {isComplete && (
+        {isComplete && showCups && (
           <span className="text-xs font-medium" style={{ color: p2Wins ? primaryColor : 'var(--ui-text-faint)' }}>
             {match.participant2_cups ?? 0}
           </span>

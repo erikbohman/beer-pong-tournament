@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react'
 import { MatchCard } from './MatchCard'
 import { ScoreModal } from './ScoreModal'
+import { WinnerHero } from './WinnerHero'
+import { WinnerBanner } from './WinnerBanner'
 import { getNextRoundMatchInfo } from '@/lib/bracketUtils'
 import { supabase } from '@/lib/supabase'
-import type { Match } from '@/lib/types'
+import type { Match, Player } from '@/lib/types'
 
 interface KnockoutBracketProps {
   matches: Match[]
   participantNames: Record<string, string>
+  teamPlayers?: Record<string, Player[]>
+  players?: Player[]
   primaryColor: string
   accentColor: string
   onMatchUpdated: (match: Match) => void
@@ -16,11 +20,14 @@ interface KnockoutBracketProps {
 export function KnockoutBracket({
   matches,
   participantNames,
+  teamPlayers = {},
+  players = [],
   primaryColor,
   accentColor,
   onMatchUpdated,
 }: KnockoutBracketProps) {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null)
+  const [showWinner, setShowWinner] = useState(false)
 
   // Auto-advance BYE winners that haven't been forwarded yet (fixes existing brackets)
   useEffect(() => {
@@ -87,8 +94,22 @@ export function KnockoutBracket({
     )
   }
 
+  // Compute final winner for persistent banner
+  const finalRound = knockoutMatches.reduce((max, m) => Math.max(max, m.round), 0)
+  const finalMatch = knockoutMatches.find(m => m.round === finalRound && m.winner_id)
+  const finalWinnerId = finalMatch?.winner_id ?? null
+
   return (
     <>
+      {finalWinnerId && (
+        <WinnerBanner
+          winnerName={participantNames[finalWinnerId] ?? 'Champion'}
+          members={teamPlayers[finalWinnerId] ?? players.filter(p => p.id === finalWinnerId)}
+          primaryColor={primaryColor}
+          accentColor={accentColor}
+        />
+      )}
+
       <div className="overflow-x-auto pb-4 flex justify-center">
         <div className="flex flex-col min-w-max">
 
@@ -127,6 +148,7 @@ export function KnockoutBracket({
                         : 'TBD'
                     }
                     primaryColor={primaryColor}
+                    showCups={false}
                     onClick={() => {
                       // Don't allow editing byes
                       if (!match.participant1_id || !match.participant2_id) return
@@ -140,6 +162,16 @@ export function KnockoutBracket({
 
         </div>
       </div>
+
+      {showWinner && finalWinnerId && (
+        <WinnerHero
+          winnerName={participantNames[finalWinnerId] ?? 'Champion'}
+          members={teamPlayers[finalWinnerId] ?? players.filter(p => p.id === finalWinnerId)}
+          primaryColor={primaryColor}
+          accentColor={accentColor}
+          onDismiss={() => setShowWinner(false)}
+        />
+      )}
 
       {selectedMatch && (
         <ScoreModal
@@ -156,10 +188,18 @@ export function KnockoutBracket({
           }
           primaryColor={primaryColor}
           accentColor={accentColor}
+          skipCups
           onClose={() => setSelectedMatch(null)}
           onSaved={async (updatedMatch) => {
             onMatchUpdated(updatedMatch)
             setSelectedMatch(null)
+
+            // Show winner hero if this was the final match
+            const allKnockout = matches.filter(m => m.stage === 'knockout')
+            const finalRound = allKnockout.reduce((max, m) => Math.max(max, m.round), 0)
+            if (updatedMatch.round === finalRound && updatedMatch.winner_id) {
+              setShowWinner(true)
+            }
 
             // Cascade: advance winner + clear stale downstream results
             let currentMatch = updatedMatch
