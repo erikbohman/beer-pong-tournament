@@ -224,8 +224,9 @@ export function getNextRoundMatchInfo(
  * groups: array of arrays of participant IDs, already ranked (index 0 = rank 1).
  * advancingPerGroup: how many from each group advance.
  *
- * Pattern: [A1, B2, C1, D2, A2, B1, C2, D1] for 4 groups, 2 advancing each.
- * This ensures group-mates can only meet in the final.
+ * Pattern: [A1, B1, C1, D1, A2, B2, C2, D2] for 4 groups, 2 advancing each.
+ * Combined with buildSeedPairs, this ensures group-mates are placed as far
+ * apart as possible in the bracket.
  */
 export function crossGroupSeedOrder(
   groups: string[][],
@@ -233,16 +234,8 @@ export function crossGroupSeedOrder(
 ): string[] {
   const result: string[] = []
   for (let rank = 0; rank < advancingPerGroup; rank++) {
-    if (rank % 2 === 0) {
-      // Forward pass: A, B, C, D...
-      for (let g = 0; g < groups.length; g++) {
-        if (groups[g][rank]) result.push(groups[g][rank])
-      }
-    } else {
-      // Reverse pass: D, C, B, A...
-      for (let g = groups.length - 1; g >= 0; g--) {
-        if (groups[g][rank]) result.push(groups[g][rank])
-      }
+    for (let g = 0; g < groups.length; g++) {
+      if (groups[g][rank]) result.push(groups[g][rank])
     }
   }
   return result
