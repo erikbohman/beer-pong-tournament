@@ -33,6 +33,7 @@ export interface Theme {
 
 export interface Tournament {
   id: string
+  slug: string | null
   name: string
   type: TournamentType
   participant_type: ParticipantType
@@ -105,6 +106,7 @@ export interface ParticipantEntry {
 
 export interface WizardFormData {
   name: string
+  slug: string
   participant_type: ParticipantType
   type: TournamentType
   num_participants: number

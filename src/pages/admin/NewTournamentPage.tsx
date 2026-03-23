@@ -23,6 +23,7 @@ import type { WizardFormData, ParticipantEntry } from '@/lib/types'
 
 const step1Schema = z.object({
   name: z.string().min(1, 'Tournament name is required').max(80),
+  slug: z.string().max(60).regex(/^[a-z0-9-]*$/, 'Only lowercase letters, numbers and hyphens').default(''),
   participant_type: z.enum(['players', 'teams']),
   type: z.enum(['single_elimination', 'group_stage', 'multi_stage']),
   num_participants: z.number().int().min(2, 'At least 2 participants').max(128),
@@ -58,6 +59,7 @@ export function NewTournamentPage() {
     resolver: zodResolver(step1Schema),
     defaultValues: {
       name: '',
+      slug: '',
       participant_type: 'players',
       type: 'single_elimination',
       num_participants: 8,
@@ -73,7 +75,7 @@ export function NewTournamentPage() {
   const { trigger, getValues, setValue } = methods
 
   async function handleNextStep() {
-    const valid = await trigger(['name', 'participant_type', 'type', 'num_participants', 'num_groups'])
+    const valid = await trigger(['name', 'slug', 'participant_type', 'type', 'num_participants', 'num_groups'])
     if (!valid) return
 
     // Initialize participant slots if moving to step 2
@@ -107,6 +109,7 @@ export function NewTournamentPage() {
         .from('tournaments')
         .insert({
           name: data.name,
+          slug: data.slug || null,
           type: data.type,
           participant_type: data.participant_type,
           status: 'draft',

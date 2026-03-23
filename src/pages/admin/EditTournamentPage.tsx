@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { supabase } from '@/lib/supabase'
@@ -15,6 +15,7 @@ import type { Tournament } from '@/lib/types'
 
 const schema = z.object({
   name: z.string().min(1, 'Name required').max(80),
+  slug: z.string().max(60).regex(/^[a-z0-9-]*$/, 'Only lowercase letters, numbers and hyphens').default(''),
   theme_id: z.string().default(''),
   start_date: z.string().default(''),
 })
@@ -31,9 +32,10 @@ export function EditTournamentPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+  const slugValue = useWatch({ control, name: 'slug' })
 
   useEffect(() => {
     if (!id) return
@@ -50,6 +52,7 @@ export function EditTournamentPage() {
       setTournament(data)
       reset({
         name: data.name,
+        slug: data.slug ?? '',
         theme_id: data.theme_id ?? '',
         start_date: data.start_date ?? '',
       })
@@ -65,6 +68,7 @@ export function EditTournamentPage() {
       .from('tournaments')
       .update({
         name: data.name,
+        slug: data.slug || null,
         theme_id: data.theme_id || null,
         start_date: data.start_date || null,
       })
@@ -99,6 +103,14 @@ export function EditTournamentPage() {
         className="flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-8 dark:border-dark-600 dark:bg-dark-800"
       >
         <Input label="Tournament Name" error={errors.name?.message} {...register('name')} />
+
+        <Input
+          label="Custom URL (optional)"
+          placeholder="e.g. summer-cup-2025"
+          hint={slugValue ? `beer-pong.se/tournament/${slugValue}` : `beer-pong.se/tournament/${tournament?.id}`}
+          error={errors.slug?.message}
+          {...register('slug')}
+        />
 
         <Select label="Theme (optional)" placeholder="No theme" {...register('theme_id')}>
           {themes.map(t => (

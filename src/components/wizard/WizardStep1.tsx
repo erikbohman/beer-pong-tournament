@@ -1,8 +1,18 @@
+import { useEffect, useRef } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Label } from '@/components/ui/Label'
 import type { WizardFormData, Theme, Rules } from '@/lib/types'
+
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/[åä]/g, 'a').replace(/ö/g, 'o')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/, '')
+    .slice(0, 60)
+}
 
 interface WizardStep1Props {
   themes: Theme[]
@@ -13,8 +23,18 @@ export function WizardStep1({ themes, rules }: WizardStep1Props) {
   const {
     register,
     watch,
+    setValue,
     formState: { errors },
   } = useFormContext<WizardFormData>()
+
+  const name = watch('name')
+  const slugTouched = useRef(false)
+
+  useEffect(() => {
+    if (!slugTouched.current) {
+      setValue('slug', slugify(name), { shouldDirty: false })
+    }
+  }, [name, setValue])
 
   const type = watch('type')
   const numParticipants = watch('num_participants')
@@ -40,6 +60,18 @@ export function WizardStep1({ themes, rules }: WizardStep1Props) {
         error={errors.name?.message}
         {...register('name')}
       />
+
+      <div>
+        <Input
+          label="Custom URL (optional)"
+          placeholder="e.g. summer-cup-2025"
+          hint={watch('slug') ? `beer-pong.se/tournament/${watch('slug')}` : 'Auto-generated from name'}
+          error={errors.slug?.message}
+          {...register('slug', {
+            onChange: () => { slugTouched.current = true },
+          })}
+        />
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <Select

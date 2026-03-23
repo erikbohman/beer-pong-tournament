@@ -32,12 +32,13 @@ export function TournamentPage() {
 
   // Realtime subscription for match updates
   useEffect(() => {
-    if (!id) return
+    const tid = tournament?.id
+    if (!tid) return
     const channel = supabase
-      .channel(`tournament-matches:${id}`)
+      .channel(`tournament-matches:${tid}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'matches', filter: `tournament_id=eq.${id}` },
+        { event: 'UPDATE', schema: 'public', table: 'matches', filter: `tournament_id=eq.${tid}` },
         payload => {
           setMatches(prev =>
             prev.map(m => (m.id === (payload.new as Match).id ? (payload.new as Match) : m))
@@ -47,7 +48,7 @@ export function TournamentPage() {
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [id])
+  }, [tournament?.id])
 
   // Realtime subscription for theme updates
   useEffect(() => {
@@ -66,14 +67,14 @@ export function TournamentPage() {
 
   async function loadTournament() {
     setLoading(true)
-    const { data: t, error } = await supabase
-      .from('tournaments')
-      .select('*')
-      .eq('id', id)
-      .eq('status', 'published')
-      .single()
+    // Try slug first, fall back to UUID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id!)
+    const query = supabase.from('tournaments').select('*').eq('status', 'published')
+    const { data: t } = isUuid
+      ? await query.eq('id', id!).maybeSingle()
+      : await query.eq('slug', id!).maybeSingle()
 
-    if (error || !t) {
+    if (!t) {
       setNotFound(true)
       setLoading(false)
       return
@@ -81,14 +82,16 @@ export function TournamentPage() {
 
     setTournament(t)
 
+    const tid = t.id // always the UUID, regardless of whether we loaded by slug or id
+
     // Load everything in parallel
     const [themeRes, rulesRes, teamsRes, playersRes, groupsRes, matchesRes] = await Promise.all([
       t.theme_id ? supabase.from('themes').select('*').eq('id', t.theme_id).single() : Promise.resolve({ data: null }),
       t.rules_id ? supabase.from('rules').select('*').eq('id', t.rules_id).single() : Promise.resolve({ data: null }),
-      supabase.from('teams').select('*').eq('tournament_id', id),
-      supabase.from('players').select('*').eq('tournament_id', id),
-      supabase.from('groups').select('*').eq('tournament_id', id).order('order_index'),
-      supabase.from('matches').select('*').eq('tournament_id', id).order('round').order('match_number'),
+      supabase.from('teams').select('*').eq('tournament_id', tid),
+      supabase.from('players').select('*').eq('tournament_id', tid),
+      supabase.from('groups').select('*').eq('tournament_id', tid).order('order_index'),
+      supabase.from('matches').select('*').eq('tournament_id', tid).order('round').order('match_number'),
     ])
 
     setTheme(themeRes.data ?? null)
