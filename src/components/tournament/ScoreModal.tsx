@@ -102,7 +102,7 @@ export function ScoreModal({
                 <button
                   key={id}
                   type="button"
-                  onClick={() => handleWinnerSelect(id)}
+                  onClick={() => id && handleWinnerSelect(id)}
                   className="flex flex-col items-center justify-center rounded-xl p-5 transition-all active:scale-95"
                   style={{
                     backgroundColor: 'var(--ui-button-bg)',
