@@ -89,6 +89,7 @@ export function TournamentBgImage({ theme, children }: { theme: Theme | null; ch
         backgroundImage: `linear-gradient(${bgOverlay}, ${bgOverlay}), url(${theme.background_image_url})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
       }
     : {}
 
