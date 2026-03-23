@@ -7,10 +7,6 @@
     box-sizing: border-box;
   }
 
-  html {
-    scrollbar-gutter: stable;
-  }
-
   body {
     @apply antialiased;
   }

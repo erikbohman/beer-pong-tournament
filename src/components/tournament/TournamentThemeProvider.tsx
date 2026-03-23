@@ -84,14 +84,21 @@ export function TournamentBgImage({ theme, children }: { theme: Theme | null; ch
     ? `${theme.background_color}8c`
     : '#11182780'
 
-  const style: React.CSSProperties = theme?.background_image_url
-    ? {
-        backgroundImage: `linear-gradient(${bgOverlay}, ${bgOverlay}), url(${theme.background_image_url})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-      }
-    : {}
-
-  return <div className="flex-1" style={style}>{children}</div>
+  return (
+    <div className="flex-1 relative">
+      {theme?.background_image_url && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: -1,
+            backgroundImage: `linear-gradient(${bgOverlay}, ${bgOverlay}), url(${theme.background_image_url})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+      )}
+      {children}
+    </div>
+  )
 }
