@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import type { Theme } from '@/lib/types'
 
 interface TournamentThemeProviderProps {
@@ -67,9 +67,7 @@ export function TournamentThemeProvider({ theme, children }: TournamentThemeProv
       } as React.CSSProperties
     : uiVars as React.CSSProperties
 
-  const bgStyle: React.CSSProperties = theme
-    ? { minHeight: '100dvh', backgroundColor: theme.background_color }
-    : { minHeight: '100dvh', backgroundColor: '#111827' }
+  const bgStyle: React.CSSProperties = { minHeight: '100dvh' }
 
   return (
     <div style={{ ...style, ...bgStyle }}>
@@ -78,27 +76,34 @@ export function TournamentThemeProvider({ theme, children }: TournamentThemeProv
   )
 }
 
-// Applies the background image to a section below the header
+// Applies the background image to the <html> element so it never moves
 export function TournamentBgImage({ theme, children }: { theme: Theme | null; children: React.ReactNode }) {
-  const bgOverlay = theme?.background_color
-    ? `${theme.background_color}8c`
-    : '#11182780'
+  useLayoutEffect(() => {
+    const el = document.documentElement
+    // Prevent html/body from scrolling so the background image never shifts.
+    // Scrolling is handled by the inner scroll container in TournamentPage.
+    el.style.overflow = 'hidden'
+    el.style.height = '100%'
+    document.body.style.overflow = 'hidden'
+    document.body.style.height = '100%'
+    if (theme?.background_image_url) {
+      const overlay = theme.background_color ? `${theme.background_color}8c` : '#11182780'
+      el.style.backgroundImage = `linear-gradient(${overlay}, ${overlay}), url(${theme.background_image_url})`
+      el.style.backgroundSize = 'cover'
+      el.style.backgroundPosition = 'center'
+      el.style.backgroundAttachment = 'fixed'
+    }
+    return () => {
+      el.style.overflow = ''
+      el.style.height = ''
+      document.body.style.overflow = ''
+      document.body.style.height = ''
+      el.style.backgroundImage = ''
+      el.style.backgroundSize = ''
+      el.style.backgroundPosition = ''
+      el.style.backgroundAttachment = ''
+    }
+  }, [theme?.background_image_url, theme?.background_color])
 
-  return (
-    <div className="flex-1 relative">
-      {theme?.background_image_url && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: -1,
-            backgroundImage: `linear-gradient(${bgOverlay}, ${bgOverlay}), url(${theme.background_image_url})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-      )}
-      {children}
-    </div>
-  )
+  return <div className="flex-1">{children}</div>
 }

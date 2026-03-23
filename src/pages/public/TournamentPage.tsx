@@ -165,48 +165,48 @@ export function TournamentPage() {
 
   return (
     <TournamentThemeProvider theme={theme}>
-      <div className="flex min-h-dvh flex-col">
-        {/* Header */}
-        <header className="sticky top-0 z-10" style={{ backgroundColor: theme?.background_color ?? '#111827', borderBottom: '1px solid var(--ui-divider)' }}>
-          <div className="mx-auto max-w-5xl px-4 py-4">
-            <div className="flex items-center gap-3 justify-center">
-              {theme?.logo_url && (
-                <img src={theme.logo_url} alt="Logo" className="h-8 w-8 rounded object-contain" />
-              )}
-              <h1
-                className="text-xl font-semibold truncate"
-                style={{ color: primaryColor }}
-              >
-                {tournament.name}
-              </h1>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="mx-auto max-w-5xl px-4 pb-3">
-            <div className="flex gap-1 rounded-xl p-1 w-fit mx-auto" style={{ backgroundColor: 'var(--ui-tab-bg)', border: '1px solid var(--ui-card-border)' }}>
-              {tabs.map(({ key, label, mobileOnly }) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setTab(key)}
-                  className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors${mobileOnly ? ' sm:hidden' : ''}`}
-                  style={
-                    tab === key
-                      ? { backgroundColor: primaryColor, color: 'white' }
-                      : { color: 'var(--ui-text-muted)' }
-                  }
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </header>
-
-        {/* Content — background image starts here, below the header */}
+      <div className="flex h-dvh flex-col overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
         <TournamentBgImage theme={theme}>
-          <main className="mx-auto max-w-5xl px-4 py-6">
+          <main className="mx-auto max-w-5xl px-4 py-6 flex flex-col gap-6">
+            {/* Header card */}
+            <div
+              className="rounded-2xl px-5 py-4 flex flex-col items-center gap-3"
+              style={{
+                backgroundColor: theme?.background_color ?? '#111827',
+                border: '1px solid var(--ui-card-border)',
+              }}
+            >
+              <div className="flex items-center gap-3">
+                {theme?.logo_url && (
+                  <img src={theme.logo_url} alt="Logo" className="h-8 w-8 rounded object-contain" />
+                )}
+                <h1
+                  className="text-xl font-semibold truncate"
+                  style={{ color: primaryColor }}
+                >
+                  {tournament.name}
+                </h1>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex gap-1 rounded-xl p-1 w-fit" style={{ backgroundColor: 'var(--ui-tab-bg)', border: '1px solid var(--ui-card-border)' }}>
+                {tabs.map(({ key, label, mobileOnly }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setTab(key)}
+                    className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors${mobileOnly ? ' sm:hidden' : ''}`}
+                    style={
+                      tab === key
+                        ? { backgroundColor: primaryColor, color: 'white' }
+                        : { color: 'var(--ui-text-muted)' }
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
             {tab === 'participants' && (
               <ParticipantsTab
                 participantType={tournament.participant_type === 'teams' ? 'teams' : 'players'}
